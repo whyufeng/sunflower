@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
-
+import uvicorn
 from api.routers import diary
 
-# 加载 .env 环境变量
 load_dotenv()
 
 app = FastAPI(
@@ -16,10 +15,7 @@ app = FastAPI(
 async def root():
     return {"message": "Welcome to Sunflower Destiny Diary! The stars are aligned."}
 
-# 注册我们的日记路由
 app.include_router(diary.router)
 
 if __name__ == "__main__":
-    import uvicorn
-    # 本地开发服务器启动入口
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

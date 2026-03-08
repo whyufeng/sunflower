@@ -4,9 +4,7 @@ from dotenv import load_dotenv
 
 class NotionService:
     def __init__(self):
-        # 确保在使用前加载了环境变量
         load_dotenv()
-        # 初始化 Notion SDK Client
         token = os.getenv("NOTION_TOKEN")
         self.database_id = os.getenv("NOTION_DATABASE_ID")
         
@@ -77,6 +75,7 @@ class NotionService:
         tag_str = ", ".join(tags) if tags else "无"
         full_content = f"【干支气场】{year_gz}年 {month_gz}月 {day_gz}日\n【今日标签】{tag_str}\n\n{content}"
         
+        # 将内容恢复写在正文(children_blocks)里
         children_blocks = []
         if full_content:
              children_blocks.append({

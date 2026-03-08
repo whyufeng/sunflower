@@ -1,0 +1,28 @@
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code environment
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Antigravity artifacts
+.gemini/
+
+# Scratch and test files
+tmp_test_calendar.py
+test_notion.py
+test_post.py

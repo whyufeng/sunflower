@@ -3,13 +3,12 @@ from pydantic import BaseModel
 from typing import List, Optional
 import datetime
 
-# 引入我们的内核服务
 from services.calendar_service import calendar_service
 from services.notion_service import notion_service
 
 router = APIRouter(prefix="/api/diary", tags=["destiny-diary"])
 
-# 定义请求体的 Pydantic Schema
+
 class DiaryEntryRequest(BaseModel):
     date: Optional[str] = None  # 支持用户手动传入 'YYYY-MM-DD'，不传则用今天
     content: str = ""
