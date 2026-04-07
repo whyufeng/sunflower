@@ -27,3 +27,9 @@ tmp_test_calendar.py
 test_notion.py
 test_post.py
 temp_sxtwl/
+
+# n8n local data
+n8n_data/
+
+# Zip artifacts
+*.zip

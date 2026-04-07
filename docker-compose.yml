@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  n8n:
+    build:
+      context: .
+      dockerfile: n8n.Dockerfile
+    image: my-n8n-with-lunar
+    container_name: n8n_server
+    ports:
+      - "5678:5678"
+    environment:
+      - NODE_FUNCTION_ALLOW_EXTERNAL=lunar-javascript
+      - WEBHOOK_URL=https://n8n.nyutech.uk/
+      - N8N_PROXY_HOPS=1
+      - N8N_HOST=n8n.nyutech.uk
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - GENERIC_TIMEZONE=America/Chicago
+      - NODE_PATH=/usr/local/lib/node_modules
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    restart: always

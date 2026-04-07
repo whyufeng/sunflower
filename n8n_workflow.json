@@ -1,0 +1,164 @@
+{
+  "name": "Daily Lunar Calendar to Notion (JS Version)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "2220df9f-2496-495d-92b4-8d09ce63c7a3",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        -64
+      ],
+      "webhookId": "00000000-0000-0000-0000-000000000000",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "DaMo1Br15JHlT8bf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const { Lunar } = require('lunar-javascript');\n\nconst messageDate = $input.item.json.message?.date;\nlet today = new Date();\nif (messageDate) {\n  today = new Date(messageDate * 1000);\n}\n\n// 依赖 lunar-javascript 库高精度计算农历干支\nconst lunar = Lunar.fromDate(today);\n\nconst yearGz = lunar.getYearInGanZhi();\nconst monthGz = lunar.getMonthInGanZhi();\nconst dayGz = lunar.getDayInGanZhi();\n\nconst messageText = $input.item.json.message?.text || \"\";\n\nreturn {\n  local_date: today.toISOString(),\n  year_gz: yearGz,\n  month_gz: monthGz,\n  day_gz: dayGz,\n  message_text: messageText\n};"
+      },
+      "id": "f97bd1a4-e1cc-42f2-920e-4035d2ec9581",
+      "name": "JS Lunar Calculator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "318fa59ffe5480169382ccb1254e8e45",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Date|title",
+              "title": "={{ DateTime.fromISO($json.local_date).setZone('America/Chicago').toFormat('yyyy-MM-dd HH:mm:ss') }}"
+            },
+            {
+              "key": "=Almanac Year|rich_text",
+              "textContent": "={{ $json.year_gz }}"
+            },
+            {
+              "key": "Almanac Month|rich_text",
+              "textContent": "={{ $json.month_gz }}"
+            },
+            {
+              "key": "Almanac Day|rich_text",
+              "textContent": "={{ $json.day_gz }}"
+            },
+            {
+              "key": "Notes|rich_text",
+              "textContent": "={{ $json.message_text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d370b335-52a9-4e63-8a45-f3045468f85d",
+      "name": "Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        -64
+      ],
+      "retryOnFail": false,
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "credentials": {
+        "notionApi": {
+          "id": "F0h3BFahBGiMOleZ",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 723949174,
+          "message": {
+            "message_id": 56,
+            "from": {
+              "id": 6762525387,
+              "is_bot": false,
+              "first_name": "frank",
+              "last_name": "Y",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 6762525387,
+              "first_name": "frank",
+              "last_name": "Y",
+              "type": "private"
+            },
+            "date": 1775400848,
+            "text": "As"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "JS Lunar Calculator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JS Lunar Calculator": {
+      "main": [
+        [
+          {
+            "node": "Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "47375583-d544-440b-bcbf-281666b5fa39",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a39d61c1a6d1de9b9bf6bee348dfe4ad59a73990389191456deb1a3ff151d4f"
+  },
+  "id": "qPTBH9NieDMschMt",
+  "tags": []
+}
