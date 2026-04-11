@@ -1,0 +1,552 @@
+{
+  "name": "每日消息汇总 (Data Tables 版)",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "318fa59ffe5480169382ccb1254e8e45",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Date|title",
+              "title": "={{ $('Code in JavaScript').item.json.local_date }}"
+            },
+            {
+              "key": "Almanac Year|rich_text",
+              "textContent": "={{ $('Code in JavaScript').item.json.year_gz }}"
+            },
+            {
+              "key": "Almanac Month|rich_text",
+              "textContent": "={{ $('Code in JavaScript').item.json.month_gz }}"
+            },
+            {
+              "key": "Almanac Day|rich_text",
+              "textContent": "={{ $('Code in JavaScript').item.json.day_gz }}"
+            },
+            {
+              "key": "命理与情绪复盘|rich_text",
+              "textContent": "={{ $json.output[0].content[0].text.review }}"
+            },
+            {
+              "key": "明日展望|rich_text",
+              "textContent": "={{ $json.output[0].content[0].text.outlook }}"
+            },
+            {
+              "key": "简短小结|rich_text",
+              "textContent": "={{ $json.output[0].content[0].text.summary }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d07ec741-9673-4eab-9b8b-8a6a418670cf",
+      "name": "一次性写入 Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        192
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "F0h3BFahBGiMOleZ",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "afc19b2b-7871-462e-ab0a-d2d7e0d5b369",
+      "name": "Telegram Trigger1",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -784,
+        416
+      ],
+      "webhookId": "00000000-0000-0000-0000-000000000000",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "DaMo1Br15JHlT8bf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "s6TheuXeiOvC4JaZ",
+          "mode": "list",
+          "cachedResultName": "dailySMS",
+          "cachedResultUrl": "/projects/9fGWqLdEGjERB1MQ/datatables/s6TheuXeiOvC4JaZ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.message.message_id }}"
+            },
+            {
+              "keyName": "msgContent",
+              "keyValue": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "msgContent": "={{ $json.message.text }}",
+            "RecordDate": "={{ DateTime.fromMillis($json.message.date * 1000).setZone('America/Chicago').toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "msgContent"
+          ],
+          "schema": [
+            {
+              "id": "RecordDate",
+              "displayName": "RecordDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "msgContent",
+              "displayName": "msgContent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -544,
+        416
+      ],
+      "id": "e66e0fc9-7233-443b-96b7-bc30b56bd2b3",
+      "name": "Upsert row(s)",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 23 * * *"
+            }
+          ]
+        }
+      },
+      "id": "9f775e16-2c46-4598-9a9a-80097130035c",
+      "name": "每天 23:30 触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "s6TheuXeiOvC4JaZ",
+          "mode": "list",
+          "cachedResultName": "dailySMS",
+          "cachedResultUrl": "/projects/9fGWqLdEGjERB1MQ/datatables/s6TheuXeiOvC4JaZ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "RecordDate",
+              "keyValue": "={{ DateTime.now().setZone('America/Chicago').toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "returnAll": true,
+        "orderBy": true,
+        "orderByColumn": "id",
+        "orderByDirection": "ASC"
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        208
+      ],
+      "id": "e77953d5-ba72-4e95-81ab-18c3dfaf6f94",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "你是一位结合了中国正统子平八字命理学与现代心理学的人生导师。 接下来，我会提供给你三个信息：我的八字原局、今天和明天的黄历干支、我今日的碎碎念。 我的八字原局固定为：【丙寅，癸巳， 庚申，丙子】。\n\n【千万牢记的论命铁律】： 十神关系的生克推算，必须永远且唯一以我的**『日元（庚金）』**为中心基准点！ 我本人是庚金，请你在后台运算时严格调用以下写死的五行十神公式，绝不允许篡改或代入其他天干为中心：\n\n见金（庚/辛，申/酉）为比肩 / 劫财\n见水（壬/癸，亥/子）为食神 / 伤官\n见木（甲/乙，寅/卯）为偏财 / 正财\n见火（丙/丁，巳/午）为七杀 / 正官\n见土（戊/己，辰/戌/丑/未）为偏印 / 正印\n\n\n【推演强制规则】： 在生成今日复盘前，请你必须严格比对“流日干支”与我“原局四柱”的关系。\n\n必查【合】：天干五合、地支三合局、地支三会局、地支六合。\n必查【冲刑穿破】：地支六冲、地支三刑/自刑/无礼之刑、六害/相穿。\n必查【十神引动】：流日带来的十神（如流日干透七杀）对我原局的影响。\n若发生了以上特殊关联，必须在正文中将其与我今日“碎碎念事件”的具体发生进行对应解释。\n\n请务必按照以下框架对我进行复盘：\n【命理与情绪复盘】：分析今日流日干支与我原局的生克冲合，结合我的碎碎念事件，从玄学和心理学双重角度解释我今天遭遇与情绪的因果。\n【事件精炼提取】：用不超过100字，客观凝练地重写我今天发生的客观事件，用于存库记事。\n【明日修行针砭】：结合命理，给我一句简短有力的箴言，点出我明天最该克制和顺应的事物。\n\n“【排版禁令】：由于所有的字段已经在后端系统的表头建好，你的使命是直接提供内容！在生成每一个字段的具体取值时，必须做到开门见山直接写正文，绝对不允许在开头附带任何类似『【命理与情绪复盘】』、『【明日修心箴言】』等标记性的前缀或标题。”"
+            },
+            {
+              "content": "=今日的碎碎念如下：{{ $json.message_text }}"
+            },
+            {
+              "content": "=今日的流年、流月、流日干支依次是：{{ $json.year_gz }}，{{ $json.month_gz }}，{{ $json.day_gz }}, 明日的流年、流月、流日干支依次是：{{ $json.tmr_year_gz }},{{ $json.tmr_month_gz }},{{ $json.tmr_day_gz }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "instructions": "",
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"bazi_calculation\": {\n      \"type\": \"string\",\n      \"description\": \"这是你的【后台推演草稿本】。请在此处列出流日干支与原局发生的全部具体刑冲破害及合局的推论过程。这个字段只供你打草稿，用户看不见。\"\n    },\n    \"review\": {\n      \"type\": \"string\",\n      \"description\": \"基于原局与日柱干支的命理和心理复盘。只输出深度解析纯正文，绝对不要包含“【命理与情绪复盘】”等任何标题或前缀词。\"\n    },\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"去除情绪，针对客观事件精简提取的日志总结。只输出客观事实的纯正文，不要带有任何标题。\"\n    },\n    \"outlook\": {\n      \"type\": \"string\",\n      \"description\": \"明日的起居建议与警言。必须严格依据草稿本中推算出的『明日干支与原局的生克关系』，明确写出具体要防范的十神或五行冲突，并给出命理解法。拒绝泛泛而谈的鸡汤，保持深邃的玄学预测口吻。严禁包含任何前缀标题！\"\n    }\n  },\n  \"additionalProperties\": false,\n  \"required\": [\n    \"bazi_calculation\",\n    \"review\",\n    \"summary\",\n    \"outlook\"\n  ]\n}\n"
+            }
+          },
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        752,
+        192
+      ],
+      "id": "d03a7ec6-2008-4adb-8545-65eae8ac1a3a",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MYuBEP9Mk4YMMFPJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const { Lunar } = require('lunar-javascript');\n\nconst messageDate = $input.first().json.RecordDate;\nlet today = new Date();\nif (messageDate) {\n  today = new Date(messageDate);\n}\n\nlet tomorrow = new Date(today);\ntomorrow.setDate(tomorrow.getDate() + 1);\n\n// 依赖 lunar-javascript 库高精度计算农历干支\nconst lunar = Lunar.fromDate(today);\n\nconst yearGz = lunar.getYearInGanZhi();\nconst monthGz = lunar.getMonthInGanZhi();\nconst dayGz = lunar.getDayInGanZhi();\n\nconst lunarTomorrow = Lunar.fromDate(tomorrow);\nconst tmrYearGz = lunarTomorrow.getYearInGanZhi();\nconst tmrMonthGz = lunarTomorrow.getMonthInGanZhi();\nconst tmrDayGz = lunarTomorrow.getDayInGanZhi();\n\nconst items = $input.all();\n\nconst finalString = items.map(item => item.json.msgContent).join(';');\n\nreturn {\n  local_date: today.toISOString(),\n  year_gz: yearGz,\n  month_gz: monthGz,\n  day_gz: dayGz,\n  tmr_year_gz: tmrYearGz,\n  tmr_month_gz: tmrMonthGz,\n  tmr_day_gz: tmrDayGz,\n  message_text: finalString\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        192
+      ],
+      "id": "24fadb55-cf07-4409-9ee3-b6f25695f056",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false,
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0af3085f-c085-4d14-a464-2c23430922e8",
+              "leftValue": "={{$input.all().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": "={{ true }}"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        112,
+        208
+      ],
+      "id": "f9f7a7b8-db67-498d-9090-2cc0e3e8c145",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "=6762525387",
+        "text": "Do you have any special things to record?",
+        "replyMarkup": "replyKeyboardRemove",
+        "replyKeyboardRemove": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        384
+      ],
+      "id": "c2a01023-dede-4d75-bd55-8a0ad8a7496c",
+      "name": "Send a text message",
+      "webhookId": "aca2df59-5341-4b96-b74a-9c02f36ce77d",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaMo1Br15JHlT8bf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0af3085f-c085-4d14-a464-2c23430922e8",
+              "leftValue": "={{ parseInt(DateTime.fromISO($json.createdAt).setZone('America/Chicago').toFormat('HHmm')) }}",
+              "rightValue": 2330,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": "={{ true }}"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -304,
+        416
+      ],
+      "id": "0731b416-9220-4788-89b4-b6b0cb0c6cdf",
+      "name": "check if later than 11:30PM"
+    },
+    {
+      "parameters": {
+        "chatId": "=6762525387",
+        "text": "={{ $('Code in JavaScript').item.json.tmr_year_gz }}，{{ $('Code in JavaScript').item.json.tmr_month_gz }}，{{ $('Code in JavaScript').item.json.tmr_day_gz }}： {{ $json.output[0].content[0].text.outlook }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        432
+      ],
+      "id": "4908d4f8-3a17-4328-9c8b-a701d805881e",
+      "name": "Send a text message1",
+      "webhookId": "aca2df59-5341-4b96-b74a-9c02f36ce77d",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaMo1Br15JHlT8bf",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Code in JavaScript": [
+      {
+        "json": {
+          "local_date": "2026-04-11T03:44:35.797Z",
+          "year_gz": "丙午",
+          "month_gz": "壬辰",
+          "day_gz": "乙卯",
+          "tmr_year_gz": "丙午",
+          "tmr_month_gz": "壬辰",
+          "tmr_day_gz": "丙辰",
+          "message_text": "任务繁重，心情压抑"
+        }
+      }
+    ],
+    "Message a model": [
+      {
+        "json": {
+          "output": [
+            {
+              "id": "msg_0819d26dc0100d2a0069d9c91f7060819da5b8ec644dd82c8d",
+              "type": "message",
+              "status": "completed",
+              "content": [
+                {
+                  "type": "output_text",
+                  "annotations": [],
+                  "logprobs": [],
+                  "text": {
+                    "bazi_calculation": "流日乙卯与原局庚申日柱的关系：乙庚相合，卯申相穿。流日带来正财（乙木），与庚金相合，引动偏财的能量。卯木与申金相穿，带来冲突和不安。",
+                    "review": "今天的流日乙卯与原局庚申形成合与穿的关系。乙木正财合庚金日元，任务繁重带来财务压力，同时卯木与申金相穿，导致内心冲突和压抑感。玄学上，正财合日元意味着外界对资源和责任的要求增加，而心理上，任务的压力和时间紧迫感加剧了心情的压抑。",
+                    "summary": "因为任务繁重与责任增加，感到心情压抑和内心冲突。",
+                    "outlook": "明日流日丙辰，丙火七杀透出，辰土偏印生助。需注意过度施压和自我要求，保持冷静，避免因责任感过重而产生的焦虑。铭记：内心的稳定胜于外界的成就。"
+                  }
+                }
+              ],
+              "role": "assistant"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)": {
+      "main": [
+        [
+          {
+            "node": "check if later than 11:30PM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "每天 23:30 触发": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "check if later than 11:30PM": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "一次性写入 Notion",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "09fdb226-409b-4e4f-981a-d6e9556df349",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a39d61c1a6d1de9b9bf6bee348dfe4ad59a73990389191456deb1a3ff151d4f"
+  },
+  "id": "kZyBLERrbHbNudY8",
+  "tags": []
+}
